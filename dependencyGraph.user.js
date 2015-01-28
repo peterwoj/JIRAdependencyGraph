@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         JIRADepenedencyGrpah
+// @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
-// @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.js
-// @version      1.0.1
+// @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
+// @version      1.0.2
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/MTMS-*
