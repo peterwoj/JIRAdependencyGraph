@@ -2,7 +2,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.0.2
+// @version      1.0.3
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/MTMS-*
@@ -201,12 +201,16 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     location.empty().css("display", "block");
     location.append('<svg width=' + location.width() + ' height=' + location.height() + '><g></g></svg>');
     //Set up zoom on svg
-    svg = d3.select("svg");
+    svg = d3.select("#graph_container svg");
     inner = d3.select("#graph_container svg g");
-    zoom = d3.behavior.zoom().on("zoom", function() {
-      inner.attr("transform", "translate(" + d3.event.translate + ")" + "scale(" + d3.event.scale + ")");
+
+
+    zoom = d3.behavior.zoom().scaleExtent([0.1, 100]).on("zoom", function() {
+      inner.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
     });
     svg.call(zoom);
+
+
       graphString = 'digraph{' + graphString + '}';
       console.log(graphString);
      try {
@@ -259,7 +263,9 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
           backgroundColor: "white",
           zIndex:1000,
           display: "none",
-          padding:"20px"
+          padding:"20px",
+          boxShadow: "1px 1px 4px #eee",
+          border: "1px solid #ccc"
         }
       }
     );
