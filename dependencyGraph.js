@@ -2,16 +2,13 @@
 // @name         JIRADepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.js
-// @version      1.0
+// @version      1.0.1
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/MTMS-*
 // @match        http://10.110.101.95/browse/MTMS-*
 // @grant        GM_addStyle
-//       http://d3js.org/d3.v3.js
-//       http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js
-//       http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib-dot.js
-// @require		 http://code.jquery.com/jquery-latest.js
+// @require	  	 http://code.jquery.com/jquery-latest.js
 // @require      http://cdn.mplxtms.com/s/v/underscore-1.4.4.min.js
 // ==/UserScript==
 //
