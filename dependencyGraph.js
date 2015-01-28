@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name         JIRADepenedencyGrpah
 // @namespace    http://your.homepage/
+// @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.js
 // @version      1.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
