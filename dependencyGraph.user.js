@@ -2,7 +2,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.0.3
+// @version      1.1.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/MTMS-*
@@ -12,7 +12,7 @@
 // @require      http://cdn.mplxtms.com/s/v/underscore-1.4.4.min.js
 // ==/UserScript==
 //
-GM_addStyle('svg {border: 1px solid #999; overflow: hidden;}');
+GM_addStyle('svg {border: 1px solid #999; overflow: hidden; background-color:#fff;}');
 GM_addStyle('.node {  white-space: nowrap; text-align: center}');
 GM_addStyle('.node rect,.node circle,.node ellipse {stroke: #333;fill: #fff; stroke-width: 1.5px;}');
 GM_addStyle('.node diamond {stroke: #333;fill: #orange; stroke-width: 1.5px;}');
@@ -198,7 +198,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     render = dagreD3.render(),
     location = jQuery('#graph_container');
     
-    location.empty().css("display", "block");
+    //location.empty().css("display", "block");
     location.append('<svg width=' + location.width() + ' height=' + location.height() + '><g></g></svg>');
     //Set up zoom on svg
     svg = d3.select("#graph_container svg");
@@ -242,7 +242,9 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     options.jira_url = window.location.origin;
     options.excludes = ["requires", "is related to", "subtask", "duplicates"];
     options.issue = (window.location.pathname).split("/")[2];
-
+    
+    
+    
     jira = JiraSearch(options.jira_url);
     graphPromise = build_graph_data(options.issue, jira, options.excludes);
 
@@ -265,7 +267,11 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
           display: "none",
           padding:"20px",
           boxShadow: "1px 1px 4px #eee",
-          border: "1px solid #ccc"
+          border: "1px solid #ccc",
+          backgroundImage: "url('../download/resources/com.docminer.jira.issue-links:lhs-resources/images/wait.gif')",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundRttachment: "fixed"
         }
       }
     );
@@ -274,10 +280,11 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     //Poorly wire up dismissing the pop up
     jQuery('body').keydown(function(e){
     if(e.which == 27){
-      jQuery('#graph_container').hide();
+      jQuery(container).hide();
     }
 });
-    jQuery('li[data-label="Links Hierarchy"]').on('contextmenu', function(e) {
+    jQuery('li[data-label="Links Hierarchy"], #linkingmodule_heading').on('contextmenu', function(e) {
+      jQuery(container).empty().show();
       main();
       return false;
     });
