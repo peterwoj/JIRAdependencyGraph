@@ -2,7 +2,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.1.1
+// @version      1.2.0
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/MTMS-*
@@ -14,8 +14,14 @@
 //
 GM_addStyle('svg {border: 1px solid #999; overflow: hidden; background-color:#fff;}');
 GM_addStyle('.node {  white-space: nowrap; text-align: center}');
-GM_addStyle('.node rect,.node circle,.node ellipse {stroke: #333;fill: #fff; stroke-width: 1.5px;}');
-GM_addStyle('.node diamond {stroke: #333;fill: #orange; stroke-width: 1.5px;}');
+GM_addStyle('.node.open rect,.node.open circle,.node.open ellipse, .node.open diamond {stroke: #333;fill: #78CFFF; stroke-width: 1.5px;}');
+GM_addStyle('.node.blocked rect,.node.blocked circle,.node.blocked ellipse , .node.blocked diamond {stroke: #333;fill: #F62500; stroke-width: 1.5px;}');
+GM_addStyle('.node.inprogress rect,.node.inprogress circle,.node.inprogress ellipse, .node.inprogress diamond  {stroke: #333;fill: #FFB300; stroke-width: 1.5px;}');
+GM_addStyle('.node.resolved rect,.node.resolved circle,.node.resolved ellipse, .node.resolved diamond  {stroke: #333;fill: #7ED321; stroke-width: 1.5px;}');
+GM_addStyle('.node.qa rect,.node.qa circle,.node.qa ellipse, .node.qa diamond  {stroke: #333;fill: #B8E986; stroke-width: 1.5px;}');
+GM_addStyle('.node.qablocked rect,.node.qablocked circle,.node.qablocked ellipse, .node.qablocked diamond  {stroke: #333;fill: #FC927C; stroke-width: 1.5px;}');
+GM_addStyle('.node.closed rect,.node.closed circle,.node.closed ellipse, .node.closed diamond  {stroke: #333;fill: #A6A6A6; stroke-width: 1.5px;}');
+GM_addStyle('.node.pending rect,.node.pending circle,.node.pending ellipse, .node.pending diamond  {stroke: #333;fill: #fff; stroke-width: 1.5px;}');
 
 GM_addStyle('.cluster rect {  stroke: #333;  fill: #000;  fill-opacity: 0.1;  stroke-width: 1.5px;}');
 GM_addStyle('.edgePath path.path {  stroke: #333;  stroke-width: 1.5px;  fill: none;}');
@@ -32,7 +38,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     var self = {};
 
     self.url = url + '/rest/api/latest';
-    self.fields = ['summary', 'key', 'issuetype', 'issuelinks', 'status', 'assignee'].join(",");
+    self.fields = ['summary', 'key', 'issuetype', 'issuelinks', 'status', 'assignee', 'customfield_10002'].join(",");
     self.get = function (uri, params) {
       params = !!params ? params : {};
       return jQuery.getJSON(self.url + uri, params);
@@ -58,6 +64,17 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     };
     return self;
   },
+  statusClassMap = {
+    "1": 'open',
+    "4": 'open', //This is actually reopened...
+    "5": 'resolved',
+    "6": 'closed',
+    "3": 'inprogress',
+    "10104": 'pending',
+    "10107": 'qa',
+    "10274": 'qablocked'
+
+  },
   build_graph_data = function (start_issue_key, jira, excludes){
     // Given a starting image key and the issue-fetching function build up the GraphViz data representing relationships
     // between issues. This will consider both subtasks and issue links.
@@ -66,8 +83,9 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
       return issue.key;
     },
 
-    process_link = function (issue_key, link, summary, fillColor, shape, status, fields) {
-        var direction, indicator, linked_issue, linked_issue_key, link_type,assigneeString;
+    process_link = function (issue_key, link, summary, shape, fields) {
+        var direction, indicator, linked_issue, linked_issue_key, link_type, assigneeString,
+        statusClass = (_.isUndefined(fields.status.id)) ? 'open' : statusClassMap[fields.status.id];
 
         assigneeString = (_.isNull(fields.assignee)) ? '' :
           '<br><img src=\''+ fields.assignee.avatarUrls["48x48"] + 
@@ -99,16 +117,15 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
           
 
         node = '"' + issue_key + '"' + "->" + '"' + linked_issue_key + '"';
-        //node = '"' + issue_key + '"' + '[label="' + issue_key + '\\n' + summary + '", style="fill:' + fillColor + '", shape=' + shape +'];' + node;
         node = '"' + issue_key +
-          '" [labelType="html" label="<img src=\''+ status.iconUrl + 
-          '\' title=\'' + status.name + 
+          '" [labelType="html" label="<img src=\''+ fields.status.iconUrl + 
+          '\' title=\'' + fields.status.name + 
           '\' width=\'16\' height=\'16\' ><span><a href=\'/browse/' + issue_key + 
           '\'class=\'issue-link link-title\'>' + issue_key +
-          '</a><br><span class=\'link-summary\'>' + summary + 
+          '</a> ' + fields.customfield_10002 + '<br><span class=\'link-summary\'>' + summary + 
           '</span>' + assigneeString +           
-          '</span>", style="fill:' + fillColor + 
-          '", shape="' + shape +
+          '</span>", shape="' + shape +
+          '", class="' + statusClass + 
           '"];' + node;
         return [linked_issue_key, node];
     },
@@ -142,10 +159,8 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
         request.done(function (issue) {
           var children = [],
           fields = issue.fields,
-          status = fields.status,
           assignee = (_.isNull(fields.assignee))?{avatarUrls:{"48x48":''}, displayName: ''}:fields.assignee,
           summary = fields.summary,
-          fillColor =  (parseInt(status.id) >= 5) ? '#ccc' : "#fff",
           node,
           defChildren = [];
 
@@ -156,11 +171,12 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
             summary = summary.replace("\"","'");
             summary = split_string(summary, 25);
             if (fields.issuetype.name === 'Epic') {
-                node = '"' + issue_key + '"' + ' [label="' + issue_key + '\\n' + summary + '"]';
+                node = '"' + issue_key + '"' + ' [class="open", label="' + issue_key + '\\n' + summary + '"]';
                 graph.push(node);
             }
             shape = fields.issuetype.name === 'Task' ? "rect" : 
                     fields.issuetype.name === 'Bug' ? "circle" :
+                    fields.issuetype.name === 'Epic' ? "diamond" :
                     "ellipse";
             //if fields.has_key('subtasks'):
             //    for subtask in fields['subtasks']:
@@ -171,7 +187,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
             //        children.push(subtask_key)
             if (_.has(fields, 'issuelinks')) {
                 _.each(fields.issuelinks, function (other_link) {
-                    result = process_link(issue_key, other_link, summary, fillColor, shape, status, fields);
+                    result = process_link(issue_key, other_link, summary, shape, fields);
                     if (result !== null) {
                         children.push(result[0]);
                         if (result[1] !== null) {
