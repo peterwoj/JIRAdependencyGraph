@@ -2,7 +2,7 @@
 // @name         JIRAdepenedencyGrpah
 // @namespace    https://github.com/davehamptonusa/JIRAdependencyGraph
 // @updateURL    https://raw.githubusercontent.com/davehamptonusa/JIRAdependencyGraph/master/dependencyGraph.user.js
-// @version      1.1.0
+// @version      1.1.1
 // @description  This is currently designed just for Conversant
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/MTMS-*
@@ -66,8 +66,13 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
       return issue.key;
     },
 
-    process_link = function (issue_key, link, summary, fillColor, shape, status, assignee) {
-        var direction, indicator, linked_issue, linked_issue_key, link_type;
+    process_link = function (issue_key, link, summary, fillColor, shape, status, fields) {
+        var direction, indicator, linked_issue, linked_issue_key, link_type,assigneeString;
+
+        assigneeString = (_.isNull(fields.assignee)) ? '' :
+          '<br><img src=\''+ fields.assignee.avatarUrls["48x48"] + 
+          '\' title=\'' + fields.assignee.displayName + 
+          '\' width=\'16\' height=\'16\'>'; 
 
         if (_.has(link, 'outwardIssue')) {
           direction = 'outward';
@@ -91,17 +96,18 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
 
         console.log(issue_key + indicator + link_type + indicator + linked_issue_key);
 
+          
+
         node = '"' + issue_key + '"' + "->" + '"' + linked_issue_key + '"';
         //node = '"' + issue_key + '"' + '[label="' + issue_key + '\\n' + summary + '", style="fill:' + fillColor + '", shape=' + shape +'];' + node;
         node = '"' + issue_key +
           '" [labelType="html" label="<img src=\''+ status.iconUrl + 
-          '\' title=' + status.name + 
-          ' \'width=\'16\' height=\'16\' ><span><a href=\'/browse/' + issue_key + 
+          '\' title=\'' + status.name + 
+          '\' width=\'16\' height=\'16\' ><span><a href=\'/browse/' + issue_key + 
           '\'class=\'issue-link link-title\'>' + issue_key +
           '</a><br><span class=\'link-summary\'>' + summary + 
-          '</span><br><img src=\''+ assignee.avatarUrls["48x48"] + 
-          '\' title=' + assignee.displayName + 
-          ' \'width=\'16\' height=\'16\' ></span>", style="fill:' + fillColor + 
+          '</span>' + assigneeString +           
+          '</span>", style="fill:' + fillColor + 
           '", shape="' + shape +
           '"];' + node;
         return [linked_issue_key, node];
@@ -165,7 +171,7 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
             //        children.push(subtask_key)
             if (_.has(fields, 'issuelinks')) {
                 _.each(fields.issuelinks, function (other_link) {
-                    result = process_link(issue_key, other_link, summary, fillColor, shape, status, assignee);
+                    result = process_link(issue_key, other_link, summary, fillColor, shape, status, fields);
                     if (result !== null) {
                         children.push(result[0]);
                         if (result[1] !== null) {
@@ -290,5 +296,6 @@ jQuery.getScript('http://cpettitt.github.io/project/graphlib-dot/v0.5.2/graphlib
     });
   });
 })();
+
 
 
