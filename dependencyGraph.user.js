@@ -7,6 +7,10 @@
 // @author       davehamptonusa
 // @match        http://jira.cnvrmedia.net/browse/MTMS-*
 // @match        http://10.110.101.95/browse/MTMS-*
+// @match        http://jira.cnvrmedia.net/browse/COR-*
+// @match        http://10.110.101.95/browse/COR-*
+// @match        http://jira.cnvrmedia.net/browse/HDP-*
+// @match        http://10.110.101.95/browse/HDP-*
 // @grant        GM_addStyle
 // @require	  	 http://code.jquery.com/jquery-latest.js
 // @require      http://cdn.mplxtms.com/s/v/underscore-1.4.4.min.js
